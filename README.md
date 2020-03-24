@@ -24,4 +24,4 @@ Logpow HM (LpHM): Another implementation of HM that provides brightness preserva
 
 H^' [i]=〖(log⁡(H[i]+ α)〗^β
 
-where h and h’ represent the original and modified histograms, α is a constant larger than 1, introduced to avoid taking the algorithm of zero on empty bins, and β is the exponent of the power function. For our application, we have fixed α=1 and β=2.5, values found as conservative by the original authors (Toet & Wu, 2014).
+where h and h’ represent the original and modified histograms, α is a constant larger than 1, introduced to avoid taking the algorithm of zero on empty bins, and β is the exponent of the power function.
