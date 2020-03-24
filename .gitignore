@@ -1,0 +1,9 @@
+exact_hm/
+resources/
+matlab/
+docs/
+venv/
+testing/
+neurocloud_config.py
+*.pyc
+*.*~

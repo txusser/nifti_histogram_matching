@@ -1,6 +1,6 @@
 import os
 from os.path import join, exists, isdir, dirname
-from subprocess import getstatusoutput as getoutput
+from commands import getstatusoutput as getoutput
 
 def rsystem(command):
     """
@@ -20,11 +20,13 @@ def download_ehm():
 
     source = 'https://github.com/txusser/ExactHistogramSpecification.git'
 
-    icom = 'git clone %s exact_hm'
+    icom = 'git clone %s exact_hm' % source
     rsystem(icom)
 
 def unpack_example():
-    
+
+    command = 'unzip resources.zip'
+    rsystem(command)
 
 def install_soap():
     """
@@ -52,3 +54,8 @@ def install_soap():
 
     icom = 'sudo pip install scipy'
     rsystem(icom)
+
+
+install_soap()
+download_ehm()
+unpack_example()

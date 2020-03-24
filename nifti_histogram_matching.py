@@ -45,7 +45,7 @@ def histogram_matching(reference_nii, input_nii, output_nii):
     return output_nii
 
 
-def logpow_histogram_matching(reference_nii, input_nii, output_nii):
+def logpow_histogram_matching(reference_nii, input_nii, output_nii, alpha = 1, beta = 3):
 
     # Load the template image
     template = nib.load(reference_nii)
@@ -66,8 +66,8 @@ def logpow_histogram_matching(reference_nii, input_nii, output_nii):
     s_values, bin_idx, s_counts = np.unique(pt_data_array, return_inverse=True, return_counts=True)
     t_values, t_counts = np.unique(nt_data_array, return_counts=True)
 
-    s_counts = np.power(np.log10(s_counts + 1),2.5)
-    t_counts = np.power(np.log10(t_counts + 1),2.5)
+    s_counts = np.power(np.log10(s_counts + alpha),beta)
+    t_counts = np.power(np.log10(t_counts + alpha),beta)
 
     # take the cumsum of the counts and normalize by the number of pixels to
     # get the empirical cumulative distribution functions for the source and
@@ -92,7 +92,7 @@ def logpow_histogram_matching(reference_nii, input_nii, output_nii):
     return output_nii
 
 
-def bi_histogram_matching(reference_nii, input_nii, output_nii):
+def bi_histogram_matching(reference_nii, input_nii, output_nii, nbins = 256):
 
     # Load and prepare the template image
     template = nib.load(reference_nii)
@@ -101,7 +101,7 @@ def bi_histogram_matching(reference_nii, input_nii, output_nii):
     # Set array values in the interval to val
     nt_data[indx] = 0
     nt_max = np.amax(nt_data)
-    nt_data = (255/nt_max)* nt_data
+    nt_data = ((nbins-1)/nt_max)* nt_data
 
     # Load and prepare the patient image
     patient = nib.load(input_nii)
@@ -115,10 +115,10 @@ def bi_histogram_matching(reference_nii, input_nii, output_nii):
     
     # We adjust first the low part of the histogram
     nt_data_low = nt_data
-    indx = np.where(nt_data > 128)
+    indx = np.where(nt_data > (nbins/2))
     nt_data_low[indx] = 0
     pt_data_low = pt_data
-    indx = np.where(pt_data > 128)
+    indx = np.where(pt_data > (nbins/2))
     pt_data_low[indx] = 0
     # We save data_low just for checking for the moment
     img = nib.Nifti1Image(pt_data_low, patient.affine, patient.header)
@@ -141,25 +141,25 @@ def bi_histogram_matching(reference_nii, input_nii, output_nii):
     indx = np.where(nt_data < 0)
     nt_data[indx] = 0
     nt_max = np.amax(nt_data)
-    nt_data = (255/nt_max)* nt_data
+    nt_data = ((nbins-1)/nt_max)* nt_data
 
     pt_data = patient.get_data()[:,:,:]
     indx = np.where(pt_data < 0)
     pt_data[indx] = 0
     pt_max = np.amax(pt_data)
-    pt_data = (255/pt_max)* pt_data
+    pt_data = ((nbins-1)/pt_max)* pt_data
     oldshape = pt_data.shape
 
     nt_data_high = nt_data
-    indx = np.where(nt_data <= 128)
+    indx = np.where(nt_data <= (nbins/2))
     nt_data_high[indx] = 0
-    indx = np.where(nt_data > 128)
-    nt_data_high[indx] = nt_data_high[indx]-128
+    indx = np.where(nt_data > (nbins/2))
+    nt_data_high[indx] = nt_data_high[indx]-(nbins/2)
     pt_data_high = pt_data
-    indx = np.where(pt_data <= 128)
+    indx = np.where(pt_data <= (nbins/2))
     pt_data_high[indx] = 0
-    indx_pth = np.where(pt_data_high > 128)
-    pt_data_high[indx_pth] = pt_data_high[indx_pth]-128
+    indx_pth = np.where(pt_data_high > (nbins/2))
+    pt_data_high[indx_pth] = pt_data_high[indx_pth]-(nbins/2)
 
     # Converts the data arrays to single dimension and histograms the second part of the data
     nt_data_array = nt_data_high.ravel()
@@ -184,18 +184,18 @@ def bi_histogram_matching(reference_nii, input_nii, output_nii):
     return output_nii
 
 
-def exact_histogram_matching(reference_nii, input_nii, output_nii, number_kernels=3):
+def exact_histogram_matching(reference_nii, input_nii, output_nii, number_kernels=3, nbins=1024):
 
-    from histogram_matching import ExactHistogramMatcher
+    from exact_hm.histogram_matching import ExactHistogramMatcher
     
     template = nib.load(reference_nii)
     nt_data = template.get_data()[:,:,:]
-    scaled_nt_data = np.round(1023 * (nt_data / np.max(nt_data)))
+    scaled_nt_data = np.round((nbins-1) * (nt_data / np.max(nt_data)))
     scaled_nt_data = np.asarray(scaled_nt_data, np.uint16)
 
     patient = nib.load(input_nii)
     pt_data = patient.get_data()[:,:,:]
-    scaled_pt_data = np.round(1023 * (pt_data / np.max(pt_data)))
+    scaled_pt_data = np.round((nbins-1) * (pt_data / np.max(pt_data)))
     scaled_pt_data = np.asarray(scaled_pt_data, np.uint16)
 
     reference_histogram = ExactHistogramMatcher.get_histogram(scaled_nt_data, 10)
