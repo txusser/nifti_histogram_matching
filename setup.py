@@ -21,7 +21,9 @@ def download_ehm():
     source = 'https://github.com/txusser/ExactHistogramSpecification.git'
 
     icom = 'git clone %s exact_hm' % source
-    rsystem(icom)
+
+    if not exists('exact_hm'):
+        rsystem(icom)
 
 def unpack_example():
 
