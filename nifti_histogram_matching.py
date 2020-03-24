@@ -1,5 +1,6 @@
 import nibabel as nib
 import numpy as np
+from exact_hm.histogram_matching import ExactHistogramMatcher
 
 def histogram_matching(reference_nii, input_nii, output_nii):
 
@@ -186,8 +187,7 @@ def bi_histogram_matching(reference_nii, input_nii, output_nii, nbins = 256):
 
 def exact_histogram_matching(reference_nii, input_nii, output_nii, number_kernels=3, nbins=1024):
 
-    from exact_hm.histogram_matching import ExactHistogramMatcher
-    
+      
     template = nib.load(reference_nii)
     nt_data = template.get_data()[:,:,:]
     scaled_nt_data = np.round((nbins-1) * (nt_data / np.max(nt_data)))

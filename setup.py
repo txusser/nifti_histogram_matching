@@ -41,6 +41,10 @@ def install_soap():
     # Install and upgrade PIP
     icom = 'sudo apt -y install python-pip'
     rsystem(icom)
+
+    icom = 'sudo apt -y install unzip'
+    rsystem(icom)
+
     icom = 'pip install --upgrade pip'
     rsystem(icom)
 
